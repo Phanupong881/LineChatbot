@@ -307,10 +307,7 @@ function formatTimeThai(dateTime) {
 
 async function saveUserData(userId, displayData, uniqueFoundWithoutNewline, dateTime, Datauser, imgUri) {
     try {
-      // Get a Firestore document reference based on transferRef
       const documentRef = await Datauser.doc(displayData.transferRef);
-      
-      // Check if the document already exists
       const existingDoc = await documentRef.get();
   
       if (existingDoc.exists) {
@@ -374,7 +371,7 @@ async function saveUserData(userId, displayData, uniqueFoundWithoutNewline, date
         return null;
       }
 
-      const userGreetingsRef = firestore.collection('Data');
+      const userGreetingsRef = firestore.collection(userId);
       const querySnapshot = await userGreetingsRef.get();
   
       const excelData = [['รหัสอ้างอิง', 'วันเวลาที่บันทึก', 'วันที่โอน', 'เวลาที่โอน', 'ผู้ส่ง', 'ผู้รับ', 'ราคา', 'หมายเหตุ', 'File URL']];

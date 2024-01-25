@@ -281,8 +281,8 @@ async function sendFlexMessage(client, event, displayIsDuplicate, found, display
               {
                 "type": "text",
                 "wrap": true,
-                "text": `${uniqueFoundWithoutNewline.length > 1 ? (senandrecei ? 'ชื่อผู้ส่งและชื่อผู้รับเป็นภาษาอังกฤษจึงไม่สามารถตรวจสอบได้, ' + uniqueFoundWithoutNewline.slice(2, 6).filter(item => item !== 'ถูกต้อง').join(', ') : uniqueFoundWithoutNewline.filter(item => item !== 'ถูกต้อง')) : 'ถูกต้อง'}`,
-                "color": `${uniqueFoundWithoutNewline.length > 1 ? '#FF0000' : '#1DB446'}`,
+                "text": displayIsDuplicate == "สลิปซ้ำ" ? 'สลิปซ้ำ' : `${uniqueFoundWithoutNewline.length > 1 ? (senandrecei ? 'ชื่อผู้ส่งและชื่อผู้รับเป็นภาษาอังกฤษจึงไม่สามารถตรวจสอบได้, ' + uniqueFoundWithoutNewline.slice(2, 6).filter(item => item !== 'ถูกต้อง').join(', ') : uniqueFoundWithoutNewline.filter(item => item !== 'ถูกต้อง')) : 'ถูกต้อง'}`,
+                "color": displayIsDuplicate == "สลิปซ้ำ" ? '#FF0000' : `${uniqueFoundWithoutNewline.length > 1 ? '#FF0000' : '#1DB446'}`,
                 "size": "xs",
                 "align": "end"
               }

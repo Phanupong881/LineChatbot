@@ -43,10 +43,10 @@ const lineConfig = {
 
 const client = new line.Client(lineConfig);
 
+let userId
 const db = admin.database();
 const firestore = admin.firestore();
 const userGreetingsRef = db.ref('Data');
-const Datauser = firestore.collection('Data');
 
 app.post('/webhook', line.middleware(lineConfig), async (req, res) => {
   try {
@@ -128,7 +128,6 @@ async function Webview(userId, monthsAgo, page = 1, pageSize = 20) {
   }
 }
 
-let userId;
 let monthsAgo;
 
 app.get('/search/:monthsAgo/:userid', async (req, res) => {
@@ -307,7 +306,16 @@ const handleEvent = async (event) => {
   }
   */
   if (event.type === 'message' && event.message.type === 'image') {
-    const userId = event.source.userId;
+
+    if (event.source.type === 'group') {
+      userId = event.source.groupId;
+      console.log(`เป็นเหตุการณ์ในกลุ่ม ${userId}`);
+    } else if (event.source.type === 'user') {
+      userId= event.source.userId;
+      console.log(`เป็นเหตุการณ์รายบุคคล ${userId}`);
+    }
+
+    const Datauser = firestore.collection(userId);
     var imageIds = Array.isArray(event.message.id) ? event.message.id : [event.message.id];
 
     for (const imageId of imageIds) {
@@ -329,7 +337,7 @@ const handleEvent = async (event) => {
       await client.replyMessage(event.replyToken, replyMessage);
     } else {
       await userGreetingsRef.child("Extracted").set(extractedText.convertedArray);
-      console.log('Data saved successfully.');
+      //console.log('Data saved successfully.');
       var transData = { "transDate": displayData.transactionDate, "transTime": displayData.transactionTime };
       var dateTime = module1.convertToDateTime(transData);
 
@@ -404,7 +412,15 @@ const handleEvent = async (event) => {
     });
 
   } else if (event.type === 'message' && number.test(event.message.text) || regexPattern.test(event.message.text) || event.message.text == "all" || event.message.text == "ทั้งหมด") {
-    userId = event.source.userId;
+    
+    if (event.source.type === 'group') {
+      userId = event.source.groupId;
+      console.log(`เป็นเหตุการณ์ในกลุ่ม ${userId}`);
+    } else if (event.source.type === 'user') {
+      userId= event.source.userId;
+      console.log(`เป็นเหตุการณ์รายบุคคล ${userId}`);
+    }
+    
     monthsAgo = event.message.text;
     const excelFilePath = await module1.generateExcelForUser(userId, monthsAgo, firestore);
 
