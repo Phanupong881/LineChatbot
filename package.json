@@ -1,0 +1,36 @@
+{
+  "name": "line-chatbot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@google-cloud/local-auth": "^2.1.0",
+    "@google-cloud/storage": "^7.7.0",
+    "@line/bot-sdk": "^8.2.0",
+    "axios": "^1.6.5",
+    "canvas": "^2.11.2",
+    "date-fns-tz": "^2.0.0",
+    "dotenv": "^16.3.1",
+    "ejs": "^3.1.9",
+    "express": "^4.18.2",
+    "express-handlebars": "^7.1.2",
+    "express-session": "^1.17.3",
+    "firebase-admin": "^12.0.0",
+    "google-auth-library": "^9.4.1",
+    "googleapis": "^105.0.0",
+    "handlebars": "^4.7.8",
+    "hbs": "^4.2.0",
+    "jsqr": "^1.4.0",
+    "moment": "^2.30.1",
+    "open": "^10.0.3",
+    "sharp": "^0.33.2",
+    "xlsx": "^0.18.5"
+  }
+}
