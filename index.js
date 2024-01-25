@@ -87,7 +87,7 @@ async function Webview(userId, monthsAgo, page = 1, pageSize = 20) {
 
     console.log(startDate);
 
-    const userGreetingsRef = await admin.firestore().collection('Data').get();
+    const userGreetingsRef = await admin.firestore().collection(userId).get();
 
     const data = [];
 
