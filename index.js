@@ -451,7 +451,7 @@ const handleEvent = async (event) => {
                       uri: signedUrl[0]
                     },
                     height: 'sm',  
-                    //margin : 'lg',
+                    margin : 'lg',
                   }
                 ]
               }
