@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>รายละเอียดการทำธุรกรรม</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      margin: 20px 0;
+      color: #ffffff; 
+      padding: 10px; 
+    }
+
+    table {
+      width: 98%;
+      border-collapse: collapse;
+      margin: 20px auto;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th,
+    td {
+      border: 1px solid #ddd;
+      padding: 16px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #007bff;
+      color: #fff;
+    }
+
+    td.file-url a {
+      display: inline-block;
+      max-width: 300px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    td.file-url a:hover {
+      text-decoration: underline;
+    }
+
+    td.note {
+      max-width: 200px;
+      overflow: hidden;
+      white-space: wrap;
+    }
+
+    /* เพิ่ม CSS media queries */
+    /* ปรับขนาดและสีข้อความลิงค์ในเซลล์ "ลิงค์ไฟล์ URL" */
+    td.file-url a {
+      max-width: 500px;
+    }
+
+    /* ปรับขนาดตารางในหน้าจอขนาดมือถือ */
+    @media only screen and (max-width: 480px) {
+      table {
+        width: 100%;
+        border-radius: 0;
+        overflow: visible;
+      }
+
+      th,
+      td {
+        padding: 12px;
+      }
+    }
+
+    .pagination {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .pagination a {
+      display: inline-block;
+      padding: 8px 16px;
+      margin: 0 4px;
+      background-color: #ddd;
+      color: #333;
+      border-radius: 4px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .pagination a.active {
+      background-color: #007bff;
+      color: #fff;
+    }
+  </style>
+</head>
+
+<body>
+  <table>
+    <thead>
+      <tr>
+        <th colspan="9">
+          <h1>ข้อมูลสลิป</h1>
+        </th>
+      </tr>
+      <tr>
+        <th>รหัสธุรกรรม</th>
+        <th>วันที่และเวลาที่บันทึก</th>
+        <th>วันที่โอน</th>
+        <th>เวลาที่โอน</th>
+        <th>ผู้รับ</th>
+        <th>ผู้ส่ง</th>
+        <th>จำนวนเงิน</th>
+        <th>หมายเหตุ</th>
+        <th>ลิงค์ไฟล์ URL</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each data}}
+      <tr>
+        <td>{{this.transactionId}}</td>
+        <td>{{this.currentDateTime}}</td>
+        <td>{{this.datetransfer}}</td>
+        <td>{{this.timetransfer}}</td>
+        <td>{{this.sender}}</td>
+        <td>{{this.receiver}}</td>
+        <td>{{this.amount}}</td>
+        <td class="note">{{this.note}}</td>
+        <td class="file-url"><a href="{{this.fileUrl}}" target="_blank">{{this.fileUrl}}</a></td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  <div class="pagination">
+    {{#if hasPreviousPage}}
+      <a href="?page={{subtract this.page 1}}" class="active">หน้าก่อนหน้า</a>
+    {{/if}}
+
+    <!-- Render page numbers -->
+    {{#each pages}}
+      {{#if isCurrentPage}}
+        <span class="active">{{this}}</span>
+      {{else}}
+        <a href="?page={{this}}" class="active">{{this}}</a>
+      {{/if}}
+    {{/each}}
+
+    {{#if hasNextPage}}
+      <a href="?page={{add this.page 1}}" class="active">หน้าถัดไป</a>
+    {{/if}}
+  </div>
+</body>
+
+</html>
