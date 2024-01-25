@@ -11,11 +11,11 @@ const xlsx = require('xlsx');
 const moment = require('moment');
 
 const storage = new Storage({
-  projectId: env.Project_firebase_id,
+  projectId: env.Project_Firebase_Id,
   keyFilename: 'firebase.json',
 });
 
-const bucket = storage.bucket('gs://test01-78b71.appspot.com');
+const bucket = storage.bucket(env.Storage_Bucket_Firebase);
 
 async function getImage(id) {
   try {
@@ -377,8 +377,8 @@ async function saveUserData(userId, displayData, uniqueFoundWithoutNewline, date
       const userGreetingsRef = firestore.collection('Data');
       const querySnapshot = await userGreetingsRef.get();
   
-      const excelData = [['วันเวลาที่บันทึก', 'วันที่โอน', 'เวลาที่โอน', 'ผู้ส่ง', 'ผู้รับ', 'ราคา', 'รหัสอ้างอิง', 'หมายเหตุ', 'File URL']];
-      const wscols = [{ wch: 30 },{ wch: 15 },{ wch: 10 },{ wch: 30 },{ wch: 30 },{ wch: 10 },{ wch: 30 },{ wch: 30 },{ wch: 50 }];
+      const excelData = [['รหัสอ้างอิง', 'วันเวลาที่บันทึก', 'วันที่โอน', 'เวลาที่โอน', 'ผู้ส่ง', 'ผู้รับ', 'ราคา', 'หมายเหตุ', 'File URL']];
+      const wscols = [{ wch: 25 },{ wch: 30 },{ wch: 15 },{ wch: 10 },{ wch: 30 },{ wch: 30 },{ wch: 10 },{ wch: 30 },{ wch: 50 }];
   
       querySnapshot.forEach((doc) => {
       const transactionData = doc.data();

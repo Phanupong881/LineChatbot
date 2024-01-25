@@ -24,7 +24,7 @@ const number = /^\d{1,2}$/;
 
 admin.initializeApp({
   credential: admin.credential.cert(firebaseConfig),
-  databaseURL: `https://test01-78b71-default-rtdb.asia-southeast1.firebasedatabase.app/`,
+  databaseURL: env.Realtime_Database_firebase,
 });
 
 app.set('view engine', 'hbs');
@@ -78,7 +78,8 @@ async function Webview(userId, monthsAgo, page = 1, pageSize = 20) {
         ? moment().startOf('month').format('YYYY-MM-DD')
         : moment().subtract(monthsAgo - 1, 'months').startOf('month').format('YYYY-MM-DD');
     } else if (monthsAgo === 'ทั้งหมด' || monthsAgo === 'all') {
-      // Do nothing, 'All' indicates no date filtering
+      var All = monthsAgo;
+      console.error(All);
     } else {
       console.error('Invalid monthsAgo format');
       return null;
@@ -311,8 +312,8 @@ const handleEvent = async (event) => {
 
     for (const imageId of imageIds) {
       var img = await module1.getImage(imageId);
-      var extractedText = await module1.extractTextFromImage(img.imgBase64);
       const verifyslipResult = await verifyslip(img.qrCodeData);
+      var extractedText = await module1.extractTextFromImage(img.imgBase64);
       var displayData = await module1.extractDetails(verifyslipResult);
     }
     
@@ -413,7 +414,7 @@ const handleEvent = async (event) => {
 
       await client.replyMessage(event.replyToken, {
         type: 'flex',
-        altText: 'สร้าง ex',
+        altText: 'สร้าง Excel',
         contents: {
           type: 'bubble',
           body: {
@@ -422,9 +423,11 @@ const handleEvent = async (event) => {
             contents: [
               {
                 type: 'text',
-                text: number.test(event.message.text) ? 'สร้างไฟล์ Excel สลิปภายใน ' + monthsAgo + " เดือนที่ผ่านมาเรียบร้อย" : 'สร้างไฟล์ Excel สลิปภายในเดือน ' + monthsAgo + " เรียบร้อย", 
+                text: number.test(event.message.text) ? 'ข้อมูลสลิปภายใน ' + monthsAgo + " เดือนที่ผ่านมา" : 'ข้อมูลสลิปภายในเดือน ' + (monthsAgo == "all" ? 'ทั้งหมด' : monthsAgo),
                 wrap: true,
-              },
+                size: 'md',
+                align: 'center'
+              },              
               {
                 type: 'box',
                 layout: 'vertical',
@@ -443,7 +446,7 @@ const handleEvent = async (event) => {
                   },
                   {
                     type: 'button',
-                    style: 'secondary',
+                    style: 'primary',
                     color: '#1DB446',
                     action: {
                       type: 'uri',
@@ -451,7 +454,7 @@ const handleEvent = async (event) => {
                       uri: signedUrl[0]
                     },
                     height: 'sm',  
-                    margin : 'lg',
+                    margin : 'md',
                   }
                 ]
               }
