@@ -132,7 +132,7 @@ let monthsAgo;
 
 app.get('/search/:monthsAgo/:userid', async (req, res) => {
   try {
-    const webuserId = req.params.userid;
+    const webuserId = userId;
     const webmonthsAgo = req.params.monthsAgo;
     const page = parseInt(req.query.page) || 1;
 
