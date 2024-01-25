@@ -427,7 +427,7 @@ const handleEvent = async (event) => {
               },
               {
                 type: 'box',
-                layout: 'horizontal',
+                layout: 'vertical',
                 margin: 'md',
                 contents: [
                   {
@@ -437,21 +437,21 @@ const handleEvent = async (event) => {
                     action: {
                       type: 'uri',
                       label: 'ดูข้อมูล',
-                      uri: 'https://slipverifychatbot-762f5f9e26af.herokuapp.com/search/' + monthsAgo + "/" + userId
+                      uri: 'https://linechatbot-rs7i.onrender.com/search/' + monthsAgo + "/" + userId
                     },
                     height: 'sm', 
                   },
                   {
                     type: 'button',
                     style: 'secondary',
-                    color: '#FF0000',
+                    color: '#1DB446',
                     action: {
                       type: 'uri',
                       label: 'ดาวน์โหลด',
                       uri: signedUrl[0]
                     },
                     height: 'sm',  
-                    margin : 'lg',
+                    //margin : 'lg',
                   }
                 ]
               }
