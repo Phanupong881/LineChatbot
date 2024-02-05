@@ -4,9 +4,9 @@ const fetch = require('node-fetch');
 const env = dotenv.config().parsed;
 
 const jsQR = require('jsqr');
-const { createCanvas, loadImage } = require('canvas');
+const {createCanvas, loadImage} = require('canvas');
 
-const { Storage } = require('@google-cloud/storage');
+const {Storage} = require('@google-cloud/storage');
 const xlsx = require('xlsx');
 const moment = require('moment');
 
@@ -40,7 +40,7 @@ async function getImage(id) {
 
     const imgBase64 = imgBuffer.toString('base64');
 
-    return { imgBase64, qrCodeData, imgBuffer };
+    return {imgBase64, qrCodeData, imgBuffer};
   } catch (error) {
     console.error('Error fetching image:', error);
     throw error;
@@ -66,6 +66,18 @@ function readQRCode(imageBuffer) {
       reject(error);
     }
   });
+}
+
+async function deletereal_db(newData, userGreetingsRef, userId) {
+  console.log("Delete" + newData);
+  const extractedRef = userGreetingsRef.child(userId + newData);
+  const existingSnapshot = await extractedRef.once('value');
+
+  if (existingSnapshot.exists()) {
+    console.warn('Data already exists. Deleting existing data...');
+    await extractedRef.remove();
+    console.log('Existing data deleted successfully.');
+  }
 }
 
 const uploadImgToStorage = async (fileBuffer, fileName) => {
@@ -113,7 +125,7 @@ const uploadFileToStorage = async (filePath, fileName) => {
   });
 
   const file = bucket.file(fileName);
-  return file.getSignedUrl({ action: 'read', expires: '03-09-2500' });
+  return file.getSignedUrl({action: 'read', expires: '03-09-2500'});
 };
 
 async function extractTextFromImage(blob) {
@@ -167,15 +179,17 @@ async function extractTextFromImage(blob) {
       const combinedArray = filteredNumberArray.concat(filteredText, extractedTextArray).filter(Boolean);
 
       const convertedArray = combinedArray.map(item => item.trim().replace(/^0\s*/, ''));
-
-      return { convertedArray, extractedTextFix };
+      console.log("SSSSS: " + convertedArray);
+      console.log("MTS: " + extractedTextFix);
+      
+      return {convertedArray, extractedTextFix};
     } else {
       console.error('No valid responses found in Vision API result:', result);
-      return { combinedArray: ['No text found'] };
+      return {combinedArray: ['No text found']};
     }
   } catch (error) {
     console.error('Error processing image:', error);
-    return { combinedArray: ['Error processing image'] };
+    return {combinedArray: ['Error processing image']};
   }
 }
 
@@ -202,7 +216,6 @@ function extractDetails(jsonData) {
   };
 
   try {
-    // Check if jsonData.sender is defined before accessing properties
     var senderDisplayName = jsonData.data.sender.displayName
     var receiverDisplayName = jsonData.data.receiver.displayName
 
@@ -215,7 +228,6 @@ function extractDetails(jsonData) {
     var transferRef2 = jsonData.data.ref2;
     var transferRef3 = jsonData.data.ref3;
 
-    // Access the sendingBank directly from jsonData.data
     var sendingBankCode = jsonData.data.sendingBank;
 
     var receivingBankCode = jsonData.data.receivingBank;
@@ -258,7 +270,6 @@ function removeOneDuplicate(array) {
   return uniqueArray;
 }
 
-// บันทึกรหัสในไฟล์ convertDateTime.js
 function convertToDateTime(transData) {
   var dateString = transData.transDate;
   var timeString = transData.transTime;
@@ -277,174 +288,222 @@ function convertToDateTime(transData) {
 
   if (monthIndex >= 0 && monthIndex < months.length) {
     var monthAbbreviation = months[monthIndex];
-    var formattedDateshrot = dateTime.toLocaleDateString('th-TH', { day: 'numeric' }) + ' ' + monthAbbreviation + dateTime.toLocaleDateString('th-TH', { year: 'numeric' });
+    var formattedDateshrot = dateTime.toLocaleDateString('th-TH', {day: 'numeric'}) + ' ' + monthAbbreviation + dateTime.toLocaleDateString('th-TH', {year: 'numeric'});
     formattedDateshrot = formattedDateshrot.replace(/พ.ศ./, '');
 
     //console.log(formattedDateshrot.trim());
 
     // ส่งค่าทั้ง dateTime และ formattedDateshrot ออกมา
-    return { dateTime, formattedDateshrot: formattedDateshrot.trim() };
+    return {dateTime, formattedDateshrot: formattedDateshrot.trim()};
   }
 }
 
 function formatDateTimeThai(dateTime) {
-  var options = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' };
+  var options = {year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric'};
   var formatter = new Intl.DateTimeFormat('th-TH', options);
   return formatter.format(dateTime);
 }
 
 function formatDateThai(dateTime) {
-  var options = { day: 'numeric', month: 'long', year: 'numeric' };
+  var options = {day: 'numeric', month: 'long', year: 'numeric'};
   var formatter = new Intl.DateTimeFormat('th-TH', options);
   return formatter.format(dateTime);
 }
 
 function formatTimeThai(dateTime) {
-  var options = { hour: 'numeric', minute: 'numeric', second: 'numeric' };
+  var options = {hour: 'numeric', minute: 'numeric', second: 'numeric'};
   var formatter = new Intl.DateTimeFormat('th-TH', options);
   return formatter.format(dateTime);
 }
 
 async function saveUserData(userId, displayData, uniqueFoundWithoutNewline, dateTime, Datauser, imgUri) {
-    try {
-      const documentRef = await Datauser.doc(displayData.transferRef);
-      const existingDoc = await documentRef.get();
-  
-      if (existingDoc.exists) {
-        console.warn('ข้อมูลของคุณมีอยู่แล้ว');
-        return "สลิปซ้ำ";
-      }
-  
-      const currentDate = new Date();
-      const formattedDate = `${currentDate.getFullYear()}${(currentDate.getMonth() + 1).toString().padStart(2, '0')}${currentDate.getDate().toString().padStart(2, '0')}`;
-      const formattedTime = `${currentDate.getHours().toString().padStart(2, '0')}:${currentDate.getMinutes().toString().padStart(2, '0')}:${currentDate.getSeconds().toString().padStart(2, '0')}`;
-  
-      var currentDatetransData = { "transDate": formattedDate, "transTime": formattedTime };
-      var resultString = uniqueFoundWithoutNewline.map(element => element.replace('ถูกต้อง', ''))
-      var note = resultString.length === 2 && resultString.includes("ถูกต้อง") ? resultString.join(",").replace(/,+/g, ",") : resultString[0].replace(/,/g, "");
+  try {
+    const documentRef = await Datauser.doc(displayData.transferRef);
+    const currentDate = new Date();
+    const formattedDate = `${currentDate.getFullYear()}${(currentDate.getMonth() + 1).toString().padStart(2, '0')}${currentDate.getDate().toString().padStart(2, '0')}`;
+    const formattedTime = `${currentDate.getHours().toString().padStart(2, '0')}:${currentDate.getMinutes().toString().padStart(2, '0')}:${currentDate.getSeconds().toString().padStart(2, '0')}`;
 
-      const dataToUpdate = {
-        'currentDateTime': await formatDateTimeThai(currentDatetransData.dateTime),
-        'userid': userId,
-        'date': displayData.transactionDate,
-        'datetransfer': await formatDateThai(dateTime.dateTime),
-        'timetransfer': await formatTimeThai(dateTime.dateTime),
-        'sender': displayData.senderDisplayName,
-        'receiver': displayData.receiverDisplayName,
-        'amount': displayData.transactionAmount,
-        'transactionId': displayData.transferRef,
-        'note': note,
-        'fileUrl': imgUri,
-      };
-  
-      await Promise.all([
-        await documentRef.set(dataToUpdate),
-      ]);
-      
-      //console.log('User data saved successfully.');
-      return "สลิปไม่ซ้ำ";
-    } catch (error) {
-      console.error('Error saving user data:', error);
-      throw error;
-    }
+    var currentDatetransData = {"transDate": formattedDate, "transTime": formattedTime};
+    var resultString = uniqueFoundWithoutNewline.map(element => element.replace('ถูกต้อง', ''))
+    var note = resultString.length === 2 && resultString.includes("ถูกต้อง") ? resultString.join(",").replace(/,+/g, ",") : resultString[0].replace(/,/g, "");
+
+    const dataToUpdate = {
+      'currentDateTime': await formatDateTimeThai(currentDatetransData.dateTime),
+      'userid': userId,
+      'date': displayData.transactionDate,
+      'datetransfer': await formatDateThai(dateTime.dateTime),
+      'timetransfer': await formatTimeThai(dateTime.dateTime),
+      'sender': displayData.senderDisplayName,
+      'receiver': displayData.receiverDisplayName,
+      'amount': displayData.transactionAmount,
+      'transactionId': displayData.transferRef,
+      'note': note,
+      'fileUrl': imgUri,
+    };
+
+    await Promise.all([
+      await documentRef.set(dataToUpdate),
+    ]);
+
+    //console.log('User data saved successfully.');
+  } catch (error) {
+    console.error('Error saving user data:', error);
+    throw error;
   }
+}
 
-  const generateExcelForUser = async (userId, monthsAgo, firestore) => {
-    try {
-      const regexPattern = /^\d{2}-\d{4}$/;
-      const number = /^\d{1,2}$/;
-      //console.log("WOW: " + monthsAgo);
-  
-      let startDate;
-  
-      if (regexPattern.test(monthsAgo)) {
-        startDate = moment(monthsAgo, 'MM-YYYY').startOf('month').format('YYYY-MM-DD');
-      } else if (number.test(monthsAgo)) {
-        startDate = monthsAgo === '1'
-          ? moment().startOf('month').format('YYYY-MM-DD')
-          : moment().subtract(monthsAgo - 1, 'months').startOf('month').format('YYYY-MM-DD');
-      } else if (monthsAgo === 'ทั้งหมด' || monthsAgo === 'all') {
-        var All = monthsAgo;
-        console.error(All);
+const generateExcelForUser = async (userId, monthsAgo, firestore) => {
+  try {
+    const regexPattern = /^\d{2}-\d{4}$/;
+    const number = /^\d{1,2}$/;
+    const datepattern = /^(0?[1-9]|1[0-2])-(20\d{2})\s*-\s*(0?[1-9]|1[0-2])-(20\d{2})$/;
+
+
+    //console.log("WOW: " + monthsAgo);
+
+    let startDate = 0;
+    let endDate = 0;
+    let newmoths = 0;
+
+    if (regexPattern.test(monthsAgo)) {
+      startDate = moment(monthsAgo, 'MM-YYYY').startOf('month').format('YYYY-MM-DD');
+    } else if (number.test(monthsAgo)) {
+      startDate = monthsAgo === '1'
+        ? moment().startOf('month').format('YYYY-MM-DD')
+        : moment().subtract(monthsAgo - 1, 'months').startOf('month').format('YYYY-MM-DD');
+    } else if (datepattern.test(monthsAgo) || datepattern.test(monthsAgo.replace(/​/g, ''))) {
+      if (datepattern.test(monthsAgo)) {
+        console.log("Matched!");
+        newmoths = monthsAgo;
       } else {
-        console.error('Invalid monthsAgo format');
-        return null;
+        console.log("Not matched!");
+        newmoths = monthsAgo.replace(/​/g, '');
       }
 
-      const userGreetingsRef = firestore.collection(userId);
-      const querySnapshot = await userGreetingsRef.get();
-  
-      const excelData = [['รหัสอ้างอิง', 'วันเวลาที่บันทึก', 'วันที่โอน', 'เวลาที่โอน', 'ผู้ส่ง', 'ผู้รับ', 'ราคา', 'หมายเหตุ', 'File URL']];
-      const wscols = [{ wch: 25 },{ wch: 30 },{ wch: 15 },{ wch: 10 },{ wch: 30 },{ wch: 30 },{ wch: 10 },{ wch: 30 },{ wch: 50 }];
-  
-      querySnapshot.forEach((doc) => {
-      const transactionData = doc.data();
-  
-        if (
-          transactionData.userid === userId &&
-          moment(transactionData.date).isAfter(startDate) &&
-          number.test(monthsAgo)
-        ) {
-          const row = [
-            transactionData.transactionId,
-            transactionData.currentDateTime,
-            transactionData.datetransfer,
-            transactionData.timetransfer,
-            transactionData.sender,
-            transactionData.receiver,
-            transactionData.amount,
-            transactionData.note,
-            transactionData.fileUrl,
-          ];
-          excelData.push(row);
-        } else if (
-          transactionData.userid === userId &&
-          moment(transactionData.date).isSame(startDate, 'month') &&
-          regexPattern.test(monthsAgo)
-        ) {
-          const row = [
-            transactionData.transactionId,
-            transactionData.currentDateTime,
-            transactionData.datetransfer,
-            transactionData.timetransfer,
-            transactionData.sender,
-            transactionData.receiver,
-            transactionData.amount,
-            transactionData.note,
-            transactionData.fileUrl,
-          ];
-          excelData.push(row);
-        } else if (transactionData.userid === userId && (All === 'ทั้งหมด' || All === 'all')) {
-          const row = [
-            transactionData.transactionId,
-            transactionData.currentDateTime,
-            transactionData.datetransfer,
-            transactionData.timetransfer,
-            transactionData.sender,
-            transactionData.receiver,
-            transactionData.amount,
-            transactionData.note,
-            transactionData.fileUrl,
-          ];
-          excelData.push(row);
-        }
-      });
-  
-      const ws = xlsx.utils.aoa_to_sheet(excelData, { header: 1 });
-      ws['!cols'] = wscols;
-      const wb = xlsx.utils.book_new();
-      xlsx.utils.book_append_sheet(wb, ws, 'Sheet 1');
-      const excelFilePath = 'output.xlsx';
-      xlsx.writeFile(wb, excelFilePath);
-  
-      console.log('สร้างไฟล์ Excel เรียบร้อยสำหรับผู้ใช้:', userId, 'ภายในเดือนที่ผ่านมา', monthsAgo, 'เดือน');
-      return excelFilePath;
-    } catch (error) {
-      console.error('Error creating Excel file:', error);
+      const [startDateString, endDateString] = newmoths.split(" - ");
+      startDate = moment(startDateString, 'MM-YYYY').startOf('month').format('YYYY-MM-DD');
+      endDate = moment(endDateString, 'MM-YYYY').endOf('month').format('YYYY-MM-DD');
+      
+    } else if (monthsAgo === 'ทั้งหมด' || monthsAgo === 'all') {
+      var All = monthsAgo;
+      console.error(All);
+    } else {
+      console.error('Invalid monthsAgo format');
       return null;
     }
-  };
-  
+
+    console.log("state " + startDate);
+
+    const userGreetingsRef = firestore.collection("Data");
+    const querySnapshot = await userGreetingsRef.get();
+
+    const excelData = [['รหัสอ้างอิง', 'วันเวลาที่บันทึก', 'วันที่โอน', 'เวลาที่โอน', 'ผู้ส่ง', 'ผู้รับ', 'ราคา', 'หมายเหตุ', 'File URL']];
+    const wscols = [{wch: 25}, {wch: 30}, {wch: 15}, {wch: 10}, {wch: 30}, {wch: 30}, {wch: 10}, {wch: 30}, {wch: 50}];
+
+    querySnapshot.forEach((doc) => {
+      const transactionData = doc.data();
+
+      if (
+        transactionData.userid === userId &&
+        moment(transactionData.date).isAfter(startDate) &&
+        number.test(monthsAgo)
+      ) {
+        const row = [
+          transactionData.transactionId,
+          transactionData.currentDateTime,
+          transactionData.datetransfer,
+          transactionData.timetransfer,
+          transactionData.sender,
+          transactionData.receiver,
+          transactionData.amount,
+          transactionData.note,
+          transactionData.fileUrl,
+        ];
+        excelData.push(row);
+      } else if (
+        transactionData.userid === userId &&
+        moment(transactionData.date).isSame(startDate, 'month') &&
+        regexPattern.test(monthsAgo)
+      ) {
+        const row = [
+          transactionData.transactionId,
+          transactionData.currentDateTime,
+          transactionData.datetransfer,
+          transactionData.timetransfer,
+          transactionData.sender,
+          transactionData.receiver,
+          transactionData.amount,
+          transactionData.note,
+          transactionData.fileUrl,
+        ];
+        excelData.push(row);
+      } else if (
+        transactionData.userid === userId &&
+        moment(transactionData.date).isBetween(startDate, endDate, null, '[]') &&
+        datepattern.test(newmoths)
+      ) {
+        const row = [
+          transactionData.transactionId,
+          transactionData.currentDateTime,
+          transactionData.datetransfer,
+          transactionData.timetransfer,
+          transactionData.sender,
+          transactionData.receiver,
+          transactionData.amount,
+          transactionData.note,
+          transactionData.fileUrl,
+        ];
+        excelData.push(row);
+      } else if (transactionData.userid === userId && (All === 'ทั้งหมด' || All === 'all')) {
+        const row = [
+          transactionData.transactionId,
+          transactionData.currentDateTime,
+          transactionData.datetransfer,
+          transactionData.timetransfer,
+          transactionData.sender,
+          transactionData.receiver,
+          transactionData.amount,
+          transactionData.note,
+          transactionData.fileUrl,
+        ];
+        excelData.push(row);
+      }
+    });
+
+    const ws = xlsx.utils.aoa_to_sheet(excelData, {header: 1});
+    ws['!cols'] = wscols;s
+    const wb = xlsx.utils.book_new();
+    xlsx.utils.book_append_sheet(wb, ws, 'Sheet 1');
+    const excelFilePath = 'output.xlsx';
+    xlsx.writeFile(wb, excelFilePath);
+
+    console.log('สร้างไฟล์ Excel เรียบร้อยสำหรับผู้ใช้:', userId, 'ภายในเดือนที่ผ่านมา', monthsAgo, 'เดือน');
+    return excelFilePath;
+  } catch (error) {
+    console.error('Error creating Excel file:', error);
+    return null;
+  }
+};
+
+async function incorrectdata(client, event, userGreetingsRef, imageIds, imagenumber, userId, displayData, note, imgUri, Flex, displayIsDuplicate, found, senandrecei, statussave, dateTime) {
+  await userGreetingsRef.child(userId + imageIds + imagenumber).set({
+    'userid': userId,
+    'date': displayData.transactionDate,
+    'datetransfer': displayData.transactionDate,
+    'timetransfer': displayData.transactionTime,
+    'sender': displayData.senderDisplayName,
+    'receiver': displayData.receiverDisplayName,
+    'amount': displayData.transactionAmount,
+    'transactionId': displayData.transferRef,
+    'note': note,
+    'fileUrl': imgUri,
+  });
+  console.log(imagenumber);
+
+  console.log("@@@@");
+  await Flex.replysave(client, imagenumber, event, imageIds, displayIsDuplicate, found, displayData, note, senandrecei, statussave, dateTime, imgUri);
+}
+
 /*
   async function searchTime(word, userGreetingsRef) {
     const extract = 'Extractall';
@@ -477,18 +536,20 @@ async function saveUserData(userId, displayData, uniqueFoundWithoutNewline, date
 */
 
 module.exports = {
-  getImage: getImage,
-  uploadFileToStorage: uploadFileToStorage,
-  extractTextFromImage: extractTextFromImage,
-  extractDetails: extractDetails,
-  removeOneDuplicate: removeOneDuplicate,
-  convertToDateTime: convertToDateTime,
-  formatDateThai: formatDateThai,
-  formatTimeThai: formatTimeThai,
-  formatDateTimeThai: formatDateTimeThai,
-  saveUserData: saveUserData,
-  uploadImgToStorage: uploadImgToStorage,
-  generateExcelForUser: generateExcelForUser,
-  generateDownloadUrl: generateDownloadUrl,
+  getImage,
+  uploadFileToStorage,
+  extractTextFromImage,
+  extractDetails,
+  removeOneDuplicate,
+  convertToDateTime,
+  formatDateThai,
+  formatTimeThai,
+  formatDateTimeThai,
+  saveUserData,
+  uploadImgToStorage,
+  generateExcelForUser,
+  generateDownloadUrl,
+  incorrectdata,
+  deletereal_db,
   //searchTime : searchTime
 };
